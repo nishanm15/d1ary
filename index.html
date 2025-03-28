@@ -20,6 +20,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
 
+    <!-- ** NEW: Quill Rich Text Editor via CDN ** -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <style>
         /* --- Enhanced Design V3 --- */
          :root {
@@ -70,39 +74,17 @@
         }
 
         /* Utility Classes */
-        .global-loading {
-            display: flex; justify-content: center; align-items: center; min-height: 70vh;
-            font-size: 1.2rem; color: var(--text-muted); flex-direction: column; gap: 15px;
-        }
+        .global-loading { display: flex; justify-content: center; align-items: center; min-height: 70vh; font-size: 1.2rem; color: var(--text-muted); flex-direction: column; gap: 15px; }
         .global-loading i { font-size: 2rem; animation: spin 1.5s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .loading, .error { /* General purpose loading/error messages */
-            text-align: center; padding: 20px; font-style: italic;
-            color: var(--text-muted); font-size: 1rem;
-            background-color: var(--container-bg); border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm); margin: 20px;
-        }
-        .error { /* Applies to global, dashboard, editor errors */
-            color: var(--danger-color); font-weight: 500;
-            background-color: rgba(220, 53, 69, 0.05);
-            border: 1px solid rgba(220, 53, 69, 0.1);
-        }
-        .button {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 0.625rem 1.25rem; background-color: var(--primary-color); color: #fff;
-            border: none; border-radius: var(--border-radius-sm); cursor: pointer;
-            font-size: 0.9rem; font-weight: 500; line-height: 1.5;
-            transition: all 0.15s ease-in-out;
-            text-decoration: none; text-align: center; white-space: nowrap;
-            box-shadow: var(--shadow-xs);
-        }
+        .loading, .error { text-align: center; padding: 20px; font-style: italic; color: var(--text-muted); font-size: 1rem; background-color: var(--container-bg); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); margin: 20px; }
+        .error { color: var(--danger-color); font-weight: 500; background-color: rgba(220, 53, 69, 0.05); border: 1px solid rgba(220, 53, 69, 0.1); }
+        .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0.625rem 1.25rem; background-color: var(--primary-color); color: #fff; border: none; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 0.9rem; font-weight: 500; line-height: 1.5; transition: all 0.15s ease-in-out; text-decoration: none; text-align: center; white-space: nowrap; box-shadow: var(--shadow-xs); }
         .button:hover { background-color: var(--primary-hover-color); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
         .button:focus { outline: none; box-shadow: var(--input-focus-shadow); }
         .button:disabled { background-color: #adb5bd; cursor: not-allowed; box-shadow: none; transform: none; opacity: 0.7; }
         .button i { font-size: 1.1em; line-height: 1; }
-
-        .button-primary { /* Default */ }
+        .button-primary {}
         .button-secondary { background-color: var(--secondary-color); }
         .button-secondary:hover { background-color: var(--secondary-hover-color); }
         .button-danger { background-color: var(--danger-color); }
@@ -111,147 +93,48 @@
         .button-success:hover { background-color: var(--success-hover-color); }
         .button-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
         .button-sm i { font-size: 1em; }
-        .button-link {
-            background: none; border: none; color: var(--primary-color); text-decoration: underline;
-            padding: 0; font-size: 0.9rem; cursor: pointer; box-shadow: none;
-        }
+        .button-link { background: none; border: none; color: var(--primary-color); text-decoration: underline; padding: 0; font-size: 0.9rem; cursor: pointer; box-shadow: none; }
         .button-link:hover { color: var(--primary-hover-color); text-decoration: none; }
-
         .button-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 
-        .input-field, .textarea-field, .search-input, .date-input {
-            width: 100%; padding: 0.75rem 1rem; margin-bottom: 1rem;
-            border: 1px solid var(--input-border-color); border-radius: var(--border-radius-sm);
-            font-size: 1rem; font-family: inherit; line-height: 1.5;
-            background-color: var(--container-bg); color: var(--text-color);
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
+        .input-field, .textarea-field, .search-input, .date-input { width: 100%; padding: 0.75rem 1rem; margin-bottom: 1rem; border: 1px solid var(--input-border-color); border-radius: var(--border-radius-sm); font-size: 1rem; font-family: inherit; line-height: 1.5; background-color: var(--container-bg); color: var(--text-color); transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
         .date-input.inline { width: auto; display: inline-block; vertical-align: middle; }
-
         .input-field::placeholder, .textarea-field::placeholder, .search-input::placeholder, .date-input::placeholder { color: var(--text-muted); opacity: 0.8; }
-        .input-field:focus, .textarea-field:focus, .search-input:focus, .date-input:focus {
-             border-color: var(--input-focus-border-color); outline: 0; box-shadow: var(--input-focus-shadow);
-        }
+        .input-field:focus, .textarea-field:focus, .search-input:focus, .date-input:focus { border-color: var(--input-focus-border-color); outline: 0; box-shadow: var(--input-focus-shadow); }
         .textarea-field { min-height: 180px; resize: vertical; }
-
-        /* Search Input Specific Styling */
         .search-input-wrapper { position: relative; flex-grow: 1; max-width: 300px; }
         .search-input { padding-left: 2.5rem; margin-bottom: 0; }
         .search-icon { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; pointer-events: none; }
-
-        /* Date filter styling */
         .date-filter-wrapper { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .date-filter-wrapper label { font-size: 0.9rem; color: var(--text-muted); white-space: nowrap; }
         .date-filter-wrapper .date-input { margin-bottom: 0; max-width: 160px; padding: 0.5rem 0.8rem; }
 
+        /* Auth Screen Styles (Unchanged) */
+        .auth-container { display: flex; justify-content: center; align-items: center; padding: 20px; margin-top: 40px; }
+        .auth-card { background-color: var(--container-bg); padding: 40px 35px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center; max-width: 420px; width: 100%; }
+        .auth-card h2 { margin-bottom: 10px; color: var(--text-color); font-weight: 600; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .auth-card h2 i { color: var(--primary-color); opacity: 0.8; font-size: 1.5rem; }
+        .auth-card p.subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
+        .auth-field-wrapper { position: relative; margin-bottom: 1.3rem; text-align: left; }
+        .auth-field-wrapper label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+        .auth-field-wrapper .input-field { margin-bottom: 0; padding-left: 2.7rem; }
+        .auth-field-wrapper .input-icon { position: absolute; left: 1rem; top: calc(50% + 10px); transform: translateY(-50%); color: var(--text-muted); opacity: 0.6; font-size: 1rem; pointer-events: none; }
+        .auth-field-wrapper .password-toggle { position: absolute; right: 0.8rem; top: calc(50% + 10px); transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s; }
+        .auth-field-wrapper .password-toggle:hover { opacity: 1; }
+        .auth-card form { margin-top: 10px; }
+        .auth-card .button.submit-button { width: 100%; padding: 0.8rem 1rem; font-size: 1rem; margin-top: 10px; margin-bottom: 25px; }
+        .auth-card .button.submit-button i { font-size: 1.2em; }
+        .auth-card .toggle-auth { font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid var(--card-border-color); padding-top: 20px; margin-top: 5px; }
+        .auth-card .error { margin-top: -10px; margin-bottom: 15px; padding: 10px 15px; font-size: 0.9rem; text-align: center; border-radius: var(--border-radius-sm); color: var(--danger-color); background-color: rgba(220, 53, 69, 0.05); border: 1px solid rgba(220, 53, 69, 0.1); }
 
-        /* --- ADDED/MODIFIED: Auth Screen Styles --- */
-         .auth-container { display: flex; justify-content: center; align-items: center; padding: 20px; margin-top: 40px; } /* Added margin-top */
-         .auth-card {
-             background-color: var(--container-bg); padding: 40px 35px; border-radius: var(--border-radius);
-             box-shadow: var(--shadow-md); text-align: center; max-width: 420px; width: 100%;
-         }
-         .auth-card h2 {
-             margin-bottom: 10px; /* Reduced margin */
-             color: var(--text-color);
-             font-weight: 600;
-             font-size: 1.6rem;
-             display: flex; /* Align icon and text */
-             align-items: center;
-             justify-content: center;
-             gap: 10px;
-         }
-         .auth-card h2 i { /* Icon styling in Auth title */
-             color: var(--primary-color);
-             opacity: 0.8;
-             font-size: 1.5rem; /* Slightly smaller */
-         }
-         .auth-card p.subtitle { /* Style the subtitle paragraph */
-              color: var(--text-muted);
-              margin-bottom: 30px;
-              font-size: 0.95rem;
-         }
-         .auth-field-wrapper { /* Input field wrapper */
-             position: relative; /* Needed for absolute positioning of icons */
-             margin-bottom: 1.3rem; /* Increased spacing */
-             text-align: left;
-         }
-         .auth-field-wrapper label {
-             display: block;
-             margin-bottom: 0.4rem; /* Space between label and input */
-             font-size: 0.85rem; /* Smaller label */
-             font-weight: 500;
-             color: var(--text-muted);
-         }
-         .auth-field-wrapper .input-field { /* Specific input style in auth */
-             margin-bottom: 0; /* Remove default margin */
-             padding-left: 2.7rem; /* Space for icon */
-         }
-         .auth-field-wrapper .input-icon { /* Icon inside input field */
-             position: absolute;
-             left: 1rem;
-             top: calc(50% + 10px); /* Adjust vertical position (label shifts input down) */
-             transform: translateY(-50%);
-             color: var(--text-muted);
-             opacity: 0.6;
-             font-size: 1rem;
-             pointer-events: none; /* Make icon non-interactive */
-         }
-         .auth-field-wrapper .password-toggle { /* Password visibility toggle */
-             position: absolute;
-             right: 0.8rem;
-             top: calc(50% + 10px); /* Adjust vertical position */
-             transform: translateY(-50%);
-             background: none;
-             border: none;
-             color: var(--text-muted);
-             cursor: pointer;
-             padding: 5px;
-             font-size: 1.1rem;
-             opacity: 0.7;
-             transition: opacity 0.2s;
-         }
-         .auth-field-wrapper .password-toggle:hover { opacity: 1; }
-         .auth-card form { margin-top: 10px; } /* Space between subtitle and form */
-
-         .auth-card .button.submit-button { /* Target the main submit button */
-              width: 100%;
-              padding: 0.8rem 1rem;
-              font-size: 1rem;
-              margin-top: 10px; /* Space above button */
-              margin-bottom: 25px; /* Space below button */
-         }
-         .auth-card .button.submit-button i { /* Icon inside submit button */
-             font-size: 1.2em; /* Make icon slightly larger */
-         }
-         .auth-card .toggle-auth { /* Mode toggle link area */
-             font-size: 0.9rem;
-             color: var(--text-muted);
-             border-top: 1px solid var(--card-border-color); /* Add separator line */
-             padding-top: 20px; /* Space above toggle link */
-             margin-top: 5px; /* Align with bottom margin of button */
-         }
-         .auth-card .error { /* Specific auth error styling */
-              margin-top: -10px; /* Pull error message up closer to button */
-              margin-bottom: 15px; /* Space below error */
-              padding: 10px 15px; /* Adjust padding */
-              font-size: 0.9rem;
-              text-align: center; /* Center align error */
-              border-radius: var(--border-radius-sm); /* Add border radius */
-              color: var(--danger-color); /* Use danger color */
-              background-color: rgba(220, 53, 69, 0.05); /* Use danger background */
-              border: 1px solid rgba(220, 53, 69, 0.1); /* Use danger border */
-         }
-
-
-        /* --- Dashboard --- */
+        /* Dashboard (Unchanged) */
         .dashboard { background-color: var(--container-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); overflow: hidden; }
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border-color); }
         .dashboard-header-left { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; flex-grow: 1; }
         .dashboard-header h1 { color: var(--text-color); font-weight: 700; font-size: 1.7rem; margin: 0; white-space: nowrap; }
         .dashboard-header .button-group { margin-top: 0; flex-shrink: 0; }
 
-        /* --- Note List --- */
+        /* Note List (Unchanged, preview content is handled in JS) */
         .note-list { list-style: none; padding: 0; display: grid; gap: 20px; }
         .note-item { background-color: var(--card-bg); border: 1px solid transparent; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
         .note-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(214, 51, 132, 0.3); }
@@ -264,47 +147,116 @@
         .note-actions .button { padding: 5px 10px; font-size: 0.8rem; border-radius: var(--border-radius-sm); box-shadow: none; }
         .note-actions .button:hover { box-shadow: var(--shadow-xs); transform: translateY(0); }
         .note-actions .button i { font-size: 0.9em; }
-
         .no-notes { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; background-color: rgba(253, 242, 247, 0.5); border: 1px dashed var(--card-border-color); border-radius: var(--border-radius); }
         .no-notes i { font-size: 2rem; display: block; margin-bottom: 15px; opacity: 0.5; }
 
-        /* Note Editor/Viewer */
+        /* Note Editor/Viewer General */
         .note-editor .field-wrapper { margin-bottom: 1rem; }
         .note-editor .field-wrapper label { display: block; margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
         .note-editor .field-wrapper .input-field,
-        .note-editor .field-wrapper .textarea-field,
         .note-editor .field-wrapper .date-input { margin-bottom: 0; }
-
         .note-editor, .note-viewer { padding: 25px 30px; background-color: var(--container-bg); border: none; border-radius: var(--border-radius); margin-top: 0; box-shadow: var(--shadow-md); }
         .dashboard > .note-editor, .dashboard > .note-viewer { margin-top: 30px; }
         .note-editor h2, .note-viewer h2 { margin: -25px -30px 25px -30px; padding: 20px 30px; color: var(--text-color); font-weight: 600; font-size: 1.4rem; border-bottom: 1px solid var(--card-border-color); background-color: #f8f9fa; border-radius: var(--border-radius) var(--border-radius) 0 0; }
-        .note-viewer-content { white-space: pre-wrap; word-wrap: break-word; margin-bottom: 25px; line-height: 1.7; color: var(--text-color); font-size: 1rem; }
+
+        /* --- MODIFIED: Note Editor - Quill Integration Styles --- */
+        .note-editor .ql-toolbar.ql-snow {
+            border: 1px solid var(--input-border-color);
+            border-bottom: 0; /* Remove bottom border to merge with container */
+            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+            background-color: #f8f9fa; /* Light background for toolbar */
+            padding: 8px 8px;
+        }
+        .note-editor .ql-container.ql-snow {
+            border: 1px solid var(--input-border-color);
+            border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+            font-size: 1rem;
+            font-family: var(--font-family);
+            background-color: var(--container-bg);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        /* Add focus state similar to inputs */
+        .note-editor .ql-container.ql-snow.ql-focused {
+            border-color: var(--input-focus-border-color);
+            box-shadow: var(--input-focus-shadow);
+        }
+        .note-editor .ql-editor {
+            min-height: 250px; /* Increased min-height for editor */
+            padding: 12px 15px;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+        .note-editor .ql-editor.ql-blank::before {
+            color: var(--text-muted);
+            opacity: 0.8;
+            font-style: normal; /* Keep placeholder normal style */
+            left: 15px; /* Align placeholder with padding */
+        }
+
+        /* Note Viewer (HTML Content) */
+        .note-viewer-content {
+            white-space: normal; /* Allow wrapping */
+            word-wrap: break-word;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        /* Basic styling for content rendered from Quill HTML */
+        .note-viewer-content p { margin-bottom: 1em; }
+        .note-viewer-content ul, .note-viewer-content ol { padding-left: 1.5em; margin-bottom: 1em; }
+        .note-viewer-content li { margin-bottom: 0.3em; }
+        .note-viewer-content strong { font-weight: 600; }
+        .note-viewer-content em { font-style: italic; }
+        .note-viewer-content blockquote {
+            border-left: 3px solid var(--primary-color);
+            margin-left: 0;
+            margin-right: 0;
+            padding-left: 1em;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 1em;
+        }
+        .note-viewer-content pre.ql-syntax {
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: var(--border-radius-sm);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 1em;
+        }
+
+
         .note-viewer-meta-container { display: flex; flex-wrap: wrap; gap: 15px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--card-border-color); }
         .note-viewer-meta-item { display: flex; align-items: center; gap: 5px; }
         .note-viewer-meta-item i { opacity: 0.7; font-size: 0.9em; }
 
-        /* --- Responsive --- */
+        /* Responsive Styles (Largely Unchanged, Quill should adapt) */
         @media (max-width: 768px) {
              body { padding-top: 20px; padding-bottom: 20px;}
              #root { max-width: 95%; }
-             .dashboard, .auth-card { padding: 20px; } /* Apply padding to auth card too */
+             .dashboard, .auth-card { padding: 20px; }
              .note-editor, .note-viewer { padding: 20px; }
              .note-editor h2, .note-viewer h2 { margin: -20px -20px 20px -20px; padding: 15px 20px; font-size: 1.3rem; }
              .dashboard-header h1 { font-size: 1.5rem; }
              .dashboard-header-left { gap: 15px; }
              .search-input-wrapper { max-width: 250px; }
+             .note-editor .ql-editor { min-height: 200px; }
         }
         @media (max-width: 600px) {
             html { font-size: 15px; }
              #root { margin: 0 10px 20px 10px; max-width: calc(100% - 20px); }
              body { padding-top: 10px; padding-bottom: 10px;}
-             .auth-card { padding: 30px 25px; } /* Adjust auth card padding */
+             .auth-card { padding: 30px 25px; }
              .auth-field-wrapper .input-icon { left: 0.8rem; }
              .auth-field-wrapper .input-field { padding-left: 2.5rem; }
              .auth-field-wrapper .password-toggle { right: 0.6rem; }
              .auth-card .button.submit-button { margin-bottom: 20px; }
              .auth-card .toggle-auth { padding-top: 15px; }
-
              .dashboard { padding: 15px; }
              .dashboard-header { margin-bottom: 20px; padding-bottom: 15px; flex-direction: column; align-items: stretch; }
              .dashboard-header-left { flex-direction: column; align-items: stretch; width: 100%; gap: 15px; }
@@ -321,6 +273,8 @@
              .note-editor, .note-viewer { padding: 15px; }
              .note-editor h2, .note-viewer h2 { margin: -15px -15px 15px -15px; padding: 12px 15px; font-size: 1.2rem; }
              .note-viewer-meta-container { flex-direction: column; align-items: flex-start; gap: 8px; }
+             .note-editor .ql-editor { min-height: 180px; }
+             .note-editor .ql-toolbar.ql-snow { padding: 6px; } /* Slightly smaller toolbar padding */
         }
     </style>
 </head>
@@ -329,9 +283,9 @@
 
     <script type="text/babel">
 
-        const { useState, useEffect, useMemo, useCallback } = React;
+        const { useState, useEffect, useMemo, useCallback, useRef } = React; // Added useRef
 
-        // --- Firebase Configuration --- (Keep as is - REMEMBER TO HIDE THIS IN PRODUCTION)
+        // --- Firebase Configuration --- (Keep as is)
         const firebaseConfig = {
             apiKey: "AIzaSyBa3mKVk2Z3j5DqBuUS7YHv7pJJ0rZjwCI",
             authDomain: "d1ary-99ff5.firebaseapp.com",
@@ -342,7 +296,7 @@
             measurementId: "G-3KD0EBFMVT"
         };
 
-        // --- Initialize Firebase ---
+        // --- Initialize Firebase --- (Unchanged)
         let db, auth;
         try {
             if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); console.log("Firebase Initialized"); }
@@ -358,7 +312,7 @@
             }
         }
 
-        // --- Utility Functions ---
+        // --- Utility Functions --- (formatDateToInput, parseInputDate Unchanged)
         const formatDateToInput = (date) => { /* ... identical ... */
             if (!date || !(date instanceof Date)) return '';
             const year = date.getFullYear();
@@ -370,8 +324,24 @@
              if (!dateString) return null;
             return new Date(`${dateString}T00:00:00`);
         };
+        // ** NEW: Utility function to strip HTML for previews **
+        function stripHtml(html){
+            if (!html) return '';
+            try {
+                // Create a temporary div element
+                const tempDivElement = document.createElement("div");
+                // Set its innerHTML to the input HTML string
+                tempDivElement.innerHTML = html;
+                // Return the textContent or innerText (provides broader browser support)
+                return tempDivElement.textContent || tempDivElement.innerText || "";
+            } catch (e) {
+                console.error("Error stripping HTML:", e);
+                // Fallback for safety, though unlikely needed for Quill content
+                return html.replace(/<[^>]*>/g, '');
+            }
+        }
 
-        // --- Firebase Utility Functions ---
+        // --- Firebase Utility Functions --- (fetchNotes, saveNote, deleteNote Unchanged logic, saveNote now expects HTML content)
         const notesCollection = db ? db.collection('notes') : null;
 
         const fetchNotes = (userId, callback) => { /* ... identical ... */
@@ -408,13 +378,13 @@
              return unsubscribe;
         };
 
-        const saveNote = async (userId, noteData) => { /* ... identical ... */
+        const saveNote = async (userId, noteData) => { /* ... identical logic, 'content' is now HTML ... */
             if (!notesCollection || !userId) throw new Error("Firestore or userId not available for saveNote");
             try {
                  const timestamp = firebase.firestore.FieldValue.serverTimestamp();
                  const dataToSave = {
                      title: (noteData.title || "").trim() || "Untitled Note",
-                     content: (noteData.content || "").trim(),
+                     content: noteData.content || "", // Content is now HTML from Quill
                      entryDate: noteData.entryDate ? firebase.firestore.Timestamp.fromDate(noteData.entryDate) : null,
                      updatedAt: timestamp,
                      userId: userId
@@ -424,7 +394,8 @@
                      await noteRef.update(dataToSave); return noteData.id;
                  } else {
                      dataToSave.createdAt = timestamp;
-                     if(dataToSave.entryDate) dataToSave.updatedAt = timestamp;
+                     // Don't automatically set updatedAt = createdAt here; let Firestore handle it on create
+                     // If entryDate exists, Firestore will still handle updatedAt on create/update correctly
                      const docRef = await notesCollection.add(dataToSave); return docRef.id;
                  }
             } catch (error) {
@@ -451,8 +422,8 @@
 
         // --- React Components ---
 
-        // --- NEW: AuthComponent with Enhanced UI/Logic ---
-        function AuthComponent({ setAppError }) {
+        // AuthComponent (Unchanged)
+        function AuthComponent({ setAppError }) { /* ... identical ... */
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
             const [confirmPassword, setConfirmPassword] = useState('');
@@ -563,38 +534,162 @@
             );
         }
 
-        // NoteEditor Component
-        function NoteEditor({ note, onSave, onCancel, setAppError, currentUser }) { /* ... identical ... */
+
+        // --- MODIFIED: NoteEditor Component using Quill ---
+        function NoteEditor({ note, onSave, onCancel, setAppError, currentUser }) {
              const [title, setTitle] = useState(note ? note.title : '');
+             // Content state now holds HTML from Quill
              const [content, setContent] = useState(note ? note.content : '');
              const [entryDateString, setEntryDateString] = useState( note?.entryDate ? formatDateToInput(note.entryDate) : formatDateToInput(new Date()) );
              const [isSaving, setIsSaving] = useState(false);
              const [error, setError] = useState('');
+
+             // Refs for Quill instance and editor container
+             const quillRef = useRef(null);
+             const editorRef = useRef(null); // Ref for the div Quill will attach to
+
+             // Quill Toolbar Configuration
+             const modules = useMemo(() => ({
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                    [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                    ['link', /*'image'*/], // Image upload requires more complex handling
+                    [{ 'color': [] }, { 'background': [] }], // Added color options
+                    [{ 'align': [] }], // Added alignment
+                    ['clean']
+                ]
+             }), []);
+
+             // Effect to initialize Quill
+             useEffect(() => {
+                 let quillInstance = null;
+                 if (editorRef.current && typeof Quill !== 'undefined') {
+                     // Prevent initializing multiple times on the same element
+                     if (!quillRef.current) {
+                        console.log("Initializing Quill...");
+                        quillInstance = new Quill(editorRef.current, {
+                            modules: modules,
+                            theme: 'snow',
+                            placeholder: 'Start writing your diary entry...'
+                        });
+
+                        // Set initial content
+                        if (note?.content) {
+                            quillInstance.clipboard.dangerouslyPasteHTML(note.content);
+                        } else {
+                            quillInstance.setText(''); // Clear content for new note
+                        }
+
+                        // Store instance
+                        quillRef.current = quillInstance;
+
+                        // Add listener for text changes
+                        quillInstance.on('text-change', (delta, oldDelta, source) => {
+                            if (source === 'user') {
+                                const currentHtml = quillInstance.root.innerHTML;
+                                // Avoid setting state if content is just <p><br></p> (empty)
+                                if (currentHtml !== '<p><br></p>') {
+                                    setContent(currentHtml);
+                                } else {
+                                    setContent(''); // Store empty string if editor is cleared
+                                }
+                            }
+                        });
+                     } else {
+                        // Quill already initialized, potentially update content if note changed
+                        // NOTE: This simple approach assumes editor remounts or ID changes trigger re-render.
+                        // For more complex scenarios, compare note.content with quillRef.current.root.innerHTML
+                        // before pasting to avoid cursor jumps.
+                        if (note?.content && quillRef.current.root.innerHTML !== note.content) {
+                            console.log("Updating Quill content from note prop...");
+                            quillRef.current.clipboard.dangerouslyPasteHTML(note.content);
+                        } else if (!note?.content && quillRef.current.getLength() > 1) {
+                            quillRef.current.setText(''); // Clear if note is cleared externally
+                        }
+                     }
+                 }
+
+                 // Cleanup function
+                 return () => {
+                    // Quill doesn't have a built-in destroy. We remove the listener.
+                    // React will handle removing the DOM element.
+                    if (quillInstance && quillInstance.off) { // Check if quillInstance was created
+                         console.log("Cleaning up Quill listener");
+                         quillInstance.off('text-change');
+                    }
+                    // Don't nullify quillRef here as it might be needed momentarily after unmount
+                 };
+             // Rerun effect if the note ID changes (means we are editing a different note)
+             // or if modules change (though they are memoized)
+             }, [note?.id, modules, note?.content]); // Add note.content dependency carefully
+
+             // Effect to enable/disable Quill editor based on isSaving state
+             useEffect(() => {
+                if(quillRef.current) {
+                    quillRef.current.enable(!isSaving);
+                }
+             }, [isSaving]);
+
+
              const handleSave = async () => {
                  setIsSaving(true); setError(''); setAppError('');
                  const entryDateObject = parseInputDate(entryDateString);
                  if (!currentUser?.uid) { setError("Cannot save: User not identified."); setAppError("Save failed: User not identified."); setIsSaving(false); return; }
-                 try { await onSave(currentUser.uid, { id: note?.id, title, content, entryDate: entryDateObject }); }
+
+                 // Get the latest content from Quill state
+                 const finalContent = content; // Content state is updated by Quill's 'text-change'
+
+                 try { await onSave(currentUser.uid, { id: note?.id, title, content: finalContent, entryDate: entryDateObject }); }
                  catch (err) { const message = err.message || "Save failed."; setError(message); setAppError(message); }
                  finally { setIsSaving(false); }
              };
+
              return (
                 <div className="note-editor">
                     <h2>{note ? 'Edit Note' : 'Create New Note'}</h2>
                     {error && <p className="error" style={{ margin: '0 0 15px 0' }}>{error}</p>}
-                    <div className="field-wrapper"> <label htmlFor="entryDate">Entry Date:</label> <input type="date" id="entryDate" className="date-input" value={entryDateString} onChange={(e) => setEntryDateString(e.target.value)} disabled={isSaving} aria-label="Entry Date" /> </div>
-                    <div className="field-wrapper"> <label htmlFor="noteTitle">Title:</label> <input type="text" id="noteTitle" className="input-field" placeholder="Note Title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isSaving} aria-label="Note Title" /> </div>
-                    <div className="field-wrapper"> <label htmlFor="noteContent">Content:</label> <textarea id="noteContent" className="textarea-field" placeholder="Start writing..." value={content} onChange={(e) => setContent(e.target.value)} disabled={isSaving} aria-label="Note Content" /> </div>
-                    <div className="button-group"> <button onClick={handleSave} className="button button-success" disabled={isSaving || !currentUser}><i className="fa-solid fa-save"></i> {isSaving ? 'Saving...' : 'Save'}</button> <button onClick={onCancel} className="button button-secondary" disabled={isSaving}>Cancel</button> </div>
+
+                    <div className="field-wrapper">
+                        <label htmlFor="entryDate">Entry Date:</label>
+                        <input type="date" id="entryDate" className="date-input" value={entryDateString} onChange={(e) => setEntryDateString(e.target.value)} disabled={isSaving} aria-label="Entry Date" />
+                    </div>
+
+                    <div className="field-wrapper">
+                         <label htmlFor="noteTitle">Title:</label>
+                         <input type="text" id="noteTitle" className="input-field" placeholder="Note Title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isSaving} aria-label="Note Title" />
+                    </div>
+
+                    {/* Quill Editor Wrapper */}
+                    <div className="field-wrapper">
+                         <label>Content:</label>
+                         {/* Container for Quill */}
+                         <div ref={editorRef} style={{ /* Add specific height styles via CSS */ }}></div>
+                    </div>
+
+                    <div className="button-group">
+                         <button onClick={handleSave} className="button button-success" disabled={isSaving || !currentUser}>
+                             <i className="fa-solid fa-save"></i> {isSaving ? 'Saving...' : 'Save'}
+                         </button>
+                         <button onClick={onCancel} className="button button-secondary" disabled={isSaving}>Cancel</button>
+                    </div>
                 </div>
              );
         }
 
-        // NoteViewer Component
-         function NoteViewer({ note, onEdit, onClose }) { /* ... identical ... */
+        // --- MODIFIED: NoteViewer Component to render HTML ---
+         function NoteViewer({ note, onEdit, onClose }) {
             if (!note) return null;
             const formatDisplayDate = (date) => date ? date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
             const formatTimestamp = (date) => date ? date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+
+            // Safely render HTML content from Quill
+            const createMarkup = (htmlContent) => {
+                // Basic sanitization could be added here if needed, but for personal use, less critical.
+                // Libraries like DOMPurify are recommended for user-generated content shown to others.
+                 return { __html: htmlContent || '<i style="color: var(--text-muted)">(No content)</i>' };
+            };
+
              return (
                   <div className="note-viewer">
                      <h2>{note.title || "Untitled Note"}</h2>
@@ -603,129 +698,390 @@
                          <div className="note-viewer-meta-item"> <i className="fa-solid fa-clock"></i> <span>Updated: {formatTimestamp(note.updatedAt)}</span> </div>
                          <div className="note-viewer-meta-item"> <i className="fa-solid fa-pen-nib"></i> <span>Created: {formatTimestamp(note.createdAt)}</span> </div>
                      </div>
-                     <div className="note-viewer-content">{note.content || <i style={{color: 'var(--text-muted)'}}>(No content)</i>}</div>
-                     <div className="button-group"> <button onClick={() => onEdit(note)} className="button button-primary"><i className="fa-solid fa-pencil"></i> Edit</button> <button onClick={onClose} className="button button-secondary">Close</button> </div>
+
+                     {/* Render HTML content using dangerouslySetInnerHTML */}
+                     <div
+                         className="note-viewer-content ql-snow" /* Add ql-snow for potential theme consistency */
+                         dangerouslySetInnerHTML={createMarkup(note.content)}
+                     />
+
+                     <div className="button-group">
+                         <button onClick={() => onEdit(note)} className="button button-primary"><i className="fa-solid fa-pencil"></i> Edit</button>
+                         <button onClick={onClose} className="button button-secondary">Close</button>
+                     </div>
                  </div>
              );
          }
 
-        // Dashboard Component
-        function Dashboard({ currentUser, setAppError, handleSignOut }) { /* ... identical ... */
+        // --- MODIFIED: Dashboard Component to use stripHtml for preview ---
+        function Dashboard({ currentUser, setAppError, handleSignOut }) {
             const [notes, setNotes] = useState([]);
             const [isLoading, setIsLoading] = useState(true);
             const [error, setError] = useState('');
-            const [viewMode, setViewMode] = useState('list');
-            const [currentNote, setCurrentNote] = useState(null);
+            const [viewMode, setViewMode] = useState('list'); // 'list', 'edit', 'view'
+            const [currentNote, setCurrentNote] = useState(null); // Note object being viewed/edited
             const [searchTerm, setSearchTerm] = useState('');
-            const [filterDate, setFilterDate] = useState('');
+            const [filterDate, setFilterDate] = useState(''); // YYYY-MM-DD format
+
+            // Fetch notes on mount and when user changes
             useEffect(() => {
-                if (!currentUser?.uid) { setNotes([]); setIsLoading(false); setError(''); return; }
-                setError(''); setIsLoading(true); setAppError('');
+                if (!currentUser?.uid) {
+                    setNotes([]); setIsLoading(false); setError('');
+                    return; // No user, don't fetch
+                }
+                setError(''); setIsLoading(true); setAppError(''); // Clear previous errors/state
+                console.log("Setting up notes listener for user:", currentUser.uid);
+
                 const unsubscribe = fetchNotes(currentUser.uid, (data, fetchError) => {
-                    if (fetchError) { setError(fetchError); setAppError(fetchError); setNotes([]); }
-                    else if (data) { setNotes(data); setError(''); }
+                    if (fetchError) {
+                        console.error("Dashboard fetch error:", fetchError);
+                        setError(fetchError); setAppError(fetchError); // Show error in dashboard and globally if desired
+                        setNotes([]);
+                    } else if (data) {
+                        // console.log("Notes received:", data.length);
+                        setNotes(data);
+                        setError(''); // Clear error on successful fetch
+                    }
                     setIsLoading(false);
                 });
-                return () => { console.log("Unsubscribing notes listener"); unsubscribe(); };
-            }, [currentUser, setAppError]);
-            const filteredNotes = useMemo(() => {
+
+                // Cleanup listener on component unmount or user change
+                return () => {
+                    console.log("Unsubscribing notes listener");
+                    unsubscribe();
+                };
+            }, [currentUser, setAppError]); // Re-run effect if currentUser or setAppError changes
+
+
+            // Filter notes based on search term and date
+             const filteredNotes = useMemo(() => {
                  let tempNotes = notes;
-                if (searchTerm) { const lower = searchTerm.toLowerCase(); tempNotes = tempNotes.filter(n => (n.title?.toLowerCase()||'').includes(lower) || (n.content?.toLowerCase()||'').includes(lower)); }
-                if (filterDate) { tempNotes = tempNotes.filter(n => n.entryDate && formatDateToInput(n.entryDate) === filterDate); }
-                return tempNotes;
-            }, [notes, searchTerm, filterDate]);
+                // Filter by search term (title or *stripped* content)
+                if (searchTerm) {
+                     const lowerSearchTerm = searchTerm.toLowerCase();
+                     tempNotes = tempNotes.filter(n =>
+                         (n.title?.toLowerCase() || '').includes(lowerSearchTerm) ||
+                         (stripHtml(n.content)?.toLowerCase() || '').includes(lowerSearchTerm) // Search stripped content
+                    );
+                 }
+                 // Filter by entry date
+                 if (filterDate) {
+                     tempNotes = tempNotes.filter(n => n.entryDate && formatDateToInput(n.entryDate) === filterDate);
+                 }
+                 return tempNotes;
+             }, [notes, searchTerm, filterDate]);
+
+            // --- Handlers ---
             const handleNewNote = () => { setCurrentNote(null); setViewMode('edit'); setError(''); setAppError(''); setSearchTerm(''); setFilterDate(''); };
             const handleEditNote = (note) => { setCurrentNote(note); setViewMode('edit'); setError(''); setAppError(''); setSearchTerm(''); setFilterDate(''); };
             const handleViewNote = (note) => { setCurrentNote(note); setViewMode('view'); setError(''); /* Keep filters */ };
             const handleCancel = () => { setViewMode('list'); setCurrentNote(null); setError(''); /* Keep filters */ };
             const clearDateFilter = () => setFilterDate('');
+
             const handleSaveNote = useCallback(async (userId, noteData) => {
                  if (userId !== currentUser?.uid) { setAppError("User mismatch saving."); return; }
-                 setIsLoading(true);
-                 try { await saveNote(userId, noteData); setViewMode('list'); setCurrentNote(null); setError(''); }
-                 catch (err) { console.error("Save fail dash:", err); setError(err.message); setAppError(err.message); }
-                 finally { setIsLoading(false); }
-            }, [currentUser, setAppError]);
-            const handleDeleteNote = useCallback(async (noteId, event) => {
-                 event.stopPropagation();
-                 if (!currentUser?.uid) { setAppError("Cannot delete: No user."); return; }
-                 if (window.confirm('Delete this note?')) {
-                     setError(''); setAppError(''); setIsLoading(true);
-                     try { await deleteNote(currentUser.uid, noteId); if (currentNote?.id === noteId) { setViewMode('list'); setCurrentNote(null); } }
-                     catch (err) { setError(err.message); setAppError(err.message); }
-                     finally { setIsLoading(false); }
+                 setIsLoading(true); // Indicate activity
+                 try {
+                     await saveNote(userId, noteData);
+                     setViewMode('list'); // Go back to list after save
+                     setCurrentNote(null); // Clear current note
+                     setError(''); // Clear any previous save errors
+                     console.log("Note saved successfully");
+                 } catch (err) {
+                     console.error("Save failed in dashboard:", err);
+                     setError(err.message); // Show error within the editor/dashboard
+                     setAppError(err.message); // Optionally show global error
+                     // Keep viewMode as 'edit' so user can retry or fix
+                 } finally {
+                     setIsLoading(false);
                  }
-            }, [currentUser, currentNote, setAppError]);
+            }, [currentUser, setAppError]); // Dependencies for useCallback
+
+            const handleDeleteNote = useCallback(async (noteId, event) => {
+                 event.stopPropagation(); // Prevent triggering viewNote when clicking delete button
+                 if (!currentUser?.uid) { setAppError("Cannot delete: No user."); return; }
+
+                 if (window.confirm('Are you sure you want to delete this diary entry? This cannot be undone.')) {
+                     setError(''); setAppError(''); // Clear previous errors
+                     setIsLoading(true); // Show loading state during delete
+                     try {
+                         await deleteNote(currentUser.uid, noteId);
+                         console.log("Note deleted successfully:", noteId);
+                         // If the currently viewed/edited note was deleted, go back to list
+                         if (currentNote?.id === noteId) {
+                             setViewMode('list');
+                             setCurrentNote(null);
+                         }
+                     } catch (err) {
+                         console.error("Delete failed in dashboard:", err);
+                         setError(err.message);
+                         setAppError(err.message);
+                     } finally {
+                         setIsLoading(false);
+                     }
+                 }
+            }, [currentUser, currentNote, setAppError]); // Dependencies for useCallback
+
+            // --- Formatting for Display ---
             const formatCardDate = (date) => date ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : null;
-            const formatMetaDate = (date) => date ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'}) : 'No date';
+            const formatMetaDate = (date) => date ? date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit'}) + ' ' + date.toLocaleDateString(undefined, { month: 'short', day: 'numeric'}) : 'No date'; // Combined time and short date
+
+
             return (
                 <div className="dashboard">
                     <div className="dashboard-header">
                          <div className="dashboard-header-left">
-                             <h1>My Diary</h1>
-                             {viewMode === 'list' && ( <div className="search-input-wrapper"> <i className="fa-solid fa-search search-icon"></i> <input type="search" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} aria-label="Search notes" /> </div> )}
-                             {viewMode === 'list' && ( <div className="date-filter-wrapper"> <label htmlFor="filterDateInput">Filter by date:</label> <input type="date" id="filterDateInput" className="date-input" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} aria-label="Filter notes by date" /> {filterDate && ( <button onClick={clearDateFilter} className="button button-secondary button-sm" aria-label="Clear date filter" title="Clear date filter"> <i className="fa-solid fa-xmark"></i> Clear </button> )} </div> )}
+                             <h1>My D1ary</h1>
+                             {/* Show Search/Filter only in list view */}
+                             {viewMode === 'list' && (
+                                 <>
+                                     <div className="search-input-wrapper">
+                                         <i className="fa-solid fa-search search-icon"></i>
+                                         <input
+                                             type="search"
+                                             placeholder="Search notes..."
+                                             className="search-input"
+                                             value={searchTerm}
+                                             onChange={(e) => setSearchTerm(e.target.value)}
+                                             aria-label="Search notes"
+                                         />
+                                     </div>
+                                     <div className="date-filter-wrapper">
+                                         <label htmlFor="filterDateInput">Filter by date:</label>
+                                         <input
+                                             type="date"
+                                             id="filterDateInput"
+                                             className="date-input"
+                                             value={filterDate}
+                                             onChange={(e) => setFilterDate(e.target.value)}
+                                             aria-label="Filter notes by date"
+                                         />
+                                         {filterDate && (
+                                             <button onClick={clearDateFilter} className="button button-secondary button-sm" aria-label="Clear date filter" title="Clear date filter">
+                                                 <i className="fa-solid fa-xmark"></i> Clear
+                                             </button>
+                                         )}
+                                     </div>
+                                </>
+                            )}
                          </div>
                         <div className="button-group">
-                            {viewMode === 'list' && ( <button onClick={handleNewNote} className="button button-primary"> <i className="fa-solid fa-plus"></i> New Note </button> )}
-                            <button onClick={handleSignOut} className="button button-secondary"> <i className="fa-solid fa-right-from-bracket"></i> Sign Out </button>
+                            {viewMode === 'list' && (
+                                <button onClick={handleNewNote} className="button button-primary">
+                                    <i className="fa-solid fa-plus"></i> New Note
+                                </button>
+                            )}
+                            <button onClick={handleSignOut} className="button button-secondary">
+                                <i className="fa-solid fa-right-from-bracket"></i> Sign Out
+                            </button>
                         </div>
                     </div>
-                    {isLoading && <p className="loading">Loading notes...</p>}
+
+                    {/* Loading Indicator */}
+                    {isLoading && <p className="loading">Loading...</p>}
+
+                    {/* Dashboard Error Display */}
                     {error && <p className="error">{error}</p>}
-                    {viewMode === 'list' && !isLoading && ( <>
-                        {filteredNotes.length > 0 && ( <ul className="note-list"> {filteredNotes.map(note => { const dispDate = formatCardDate(note.entryDate); return (
-                            <li key={note.id} className="note-item" onClick={() => handleViewNote(note)} tabIndex="0" aria-label={`View note: ${note.title||'Untitled'} from ${dispDate||'no date'}`}>
-                                {dispDate && ( <div className="note-entry-date"> <i className="fa-solid fa-calendar-day"></i> {dispDate} </div> )}
-                                <h3>{note.title || 'Untitled Note'}</h3> <p className="note-content-preview">{note.content || <i>(No content)</i>}</p>
-                                <div className="note-meta">Updated: {formatMetaDate(note.updatedAt)}</div>
-                                <div className="note-actions"> <button onClick={(e) => { e.stopPropagation(); handleEditNote(note); }} className="button button-secondary" aria-label={`Edit ${note.title||'Untitled'}`}> <i className="fa-solid fa-pencil"></i> Edit </button> <button onClick={(e) => handleDeleteNote(note.id, e)} className="button button-danger" aria-label={`Delete ${note.title||'Untitled'}`}> <i className="fa-solid fa-trash-can"></i> Delete </button> </div>
-                            </li> )})} </ul> )}
-                        {notes.length === 0 && !error && !isLoading && ( <div className="no-notes"> <i className="fa-solid fa-book-open"></i> Your diary is empty.<br/> Create your first note! </div> )}
-                        {notes.length > 0 && filteredNotes.length === 0 && !error && !isLoading && ( <div className="no-notes"> <i className="fa-solid fa-filter"></i> No notes found matching filters {searchTerm&&`("${searchTerm}")`} {filterDate&&`(${formatCardDate(parseInputDate(filterDate))})`}. <br/> Adjust search or clear date filter. </div> )}
-                    </> )}
-                    {viewMode === 'edit' && <NoteEditor note={currentNote} onSave={handleSaveNote} onCancel={handleCancel} setAppError={setAppError} currentUser={currentUser}/>}
-                    {viewMode === 'view' && currentNote && <NoteViewer note={currentNote} onEdit={handleEditNote} onClose={handleCancel}/>}
-                    {viewMode === 'view' && !currentNote && !isLoading && ( useEffect(() => { setViewMode('list'); }, [viewMode, currentNote]) )}
+
+                    {/* Content Area based on viewMode */}
+                    {viewMode === 'list' && !isLoading && (
+                        <>
+                            {filteredNotes.length > 0 && (
+                                <ul className="note-list">
+                                    {filteredNotes.map(note => {
+                                        const displayDate = formatCardDate(note.entryDate);
+                                        // ** Use stripHtml for preview **
+                                        const previewText = stripHtml(note.content);
+                                        return (
+                                        <li
+                                            key={note.id}
+                                            className="note-item"
+                                            onClick={() => handleViewNote(note)}
+                                            tabIndex="0" // Make it focusable
+                                            aria-label={`View note: ${note.title || 'Untitled'} ${displayDate ? 'from '+displayDate : ' (no date)'}`}
+                                        >
+                                            {displayDate && (
+                                                <div className="note-entry-date">
+                                                    <i className="fa-solid fa-calendar-day"></i> {displayDate}
+                                                </div>
+                                            )}
+                                            <h3>{note.title || 'Untitled Note'}</h3>
+                                            <p className="note-content-preview">
+                                                {previewText || <i>(No content)</i>}
+                                            </p>
+                                            <div className="note-meta">
+                                                Updated: {formatMetaDate(note.updatedAt)}
+                                            </div>
+                                            <div className="note-actions">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleEditNote(note); }}
+                                                    className="button button-secondary button-sm" // Smaller button
+                                                    aria-label={`Edit note: ${note.title || 'Untitled'}`}
+                                                >
+                                                    <i className="fa-solid fa-pencil"></i> Edit
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteNote(note.id, e)}
+                                                    className="button button-danger button-sm" // Smaller button
+                                                    aria-label={`Delete note: ${note.title || 'Untitled'}`}
+                                                >
+                                                    <i className="fa-solid fa-trash-can"></i> Delete
+                                                </button>
+                                            </div>
+                                        </li>
+                                    )})}
+                                </ul>
+                            )}
+                            {/* No Notes Yet (Only if original notes array is empty) */}
+                            {notes.length === 0 && !error && !isLoading && (
+                                <div className="no-notes">
+                                    <i className="fa-solid fa-book-open"></i>
+                                    Your diary is empty.<br/> Create your first note!
+                                </div>
+                            )}
+                            {/* No Matching Filters (Only if notes exist but filtered list is empty) */}
+                            {notes.length > 0 && filteredNotes.length === 0 && !error && !isLoading && (
+                                <div className="no-notes">
+                                    <i className="fa-solid fa-filter"></i>
+                                    No notes found matching filters
+                                    {searchTerm && ` ("${searchTerm}")`}
+                                    {filterDate && ` (${formatCardDate(parseInputDate(filterDate))})`}.
+                                    <br/> Adjust search or clear date filter.
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* Editor View */}
+                    {viewMode === 'edit' && (
+                        <NoteEditor
+                            key={currentNote?.id || 'new'} // Force re-render if note ID changes
+                            note={currentNote}
+                            onSave={handleSaveNote}
+                            onCancel={handleCancel}
+                            setAppError={setAppError}
+                            currentUser={currentUser}
+                         />
+                    )}
+
+                    {/* Viewer View */}
+                    {viewMode === 'view' && currentNote && (
+                        <NoteViewer
+                            note={currentNote}
+                            onEdit={handleEditNote}
+                            onClose={handleCancel}
+                        />
+                    )}
+                    {/* Safety check: If in view mode but no currentNote (e.g., deleted), switch back */}
+                    {viewMode === 'view' && !currentNote && !isLoading && (
+                         useEffect(() => {
+                            console.log("In view mode without a note, switching to list.");
+                            setViewMode('list');
+                         }, [viewMode, currentNote]) // Dependency on viewMode and currentNote
+                    )}
                 </div>
             );
         }
 
-        // App Component - Manages Auth State
-        function App() { /* ... identical ... */
+
+        // App Component - Manages Auth State (Unchanged)
+        function App() {
             const [currentUser, setCurrentUser] = useState(null);
             const [authLoading, setAuthLoading] = useState(true);
-            const [appError, setAppError] = useState('');
+            const [appError, setAppError] = useState(''); // Global app errors
+
             useEffect(() => {
-                if (!auth) { setAppError("Auth not init."); setAuthLoading(false); return; }
+                if (!auth) {
+                    console.error("Firebase Auth not initialized!");
+                    setAppError("Authentication service failed to load. Check console.");
+                    setAuthLoading(false);
+                    return;
+                }
+                // Listener for authentication state changes
                 const unsubscribe = auth.onAuthStateChanged(user => {
-                    console.log("Auth state change:", user ? user.uid : 'No user');
-                    setCurrentUser(user); setAuthLoading(false); setAppError('');
+                    console.log("Auth state changed:", user ? `User logged in (${user.uid})` : 'User logged out');
+                    setCurrentUser(user); // Update user state
+                    setAuthLoading(false); // Auth check complete
+                    setAppError(''); // Clear error on successful auth check/change
                 });
+                // Cleanup listener on component unmount
                 return () => unsubscribe();
-            }, []);
+            }, []); // Run only once on mount
+
             const handleSignOut = async () => {
-                setAppError('');
-                try { await auth.signOut(); console.log("User signed out"); }
-                catch (error) { console.error("Sign Out Err:", error); setAppError(`Sign out fail: ${error.message}`); }
+                setAppError(''); // Clear previous errors
+                try {
+                    await auth.signOut();
+                    console.log("User signed out successfully");
+                    // No need to manually set currentUser to null, onAuthStateChanged will handle it
+                } catch (error) {
+                    console.error("Sign Out Error:", error);
+                    setAppError(`Sign out failed: ${error.message}`);
+                }
             };
-            if (!db || !auth) { return null; } // Init error handled above
-            if (authLoading) { return ( <div className="global-loading"> <i className="fa-solid fa-spinner fa-spin"></i> <span>Loading Diary...</span> </div> ); }
-             const renderAppError = appError ? <div className="error" style={{maxWidth: '850px', margin: '0 auto 20px auto'}}>{`App Error: ${appError}`}</div> : null;
-            return ( <> {renderAppError} {!currentUser ? ( <AuthComponent setAppError={setAppError} /> ) : ( <Dashboard currentUser={currentUser} setAppError={setAppError} handleSignOut={handleSignOut} /> )} </> );
+
+            // Render based on auth state
+            if (!db || !auth) {
+                // Error during Firebase init is handled by initial try/catch
+                return null;
+            }
+
+            if (authLoading) {
+                return (
+                    <div className="global-loading">
+                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        <span>Loading Diary...</span>
+                    </div>
+                );
+            }
+
+            // Render global error if present
+            const renderAppError = appError ? <div className="error" style={{maxWidth: '850px', margin: '0 auto 20px auto'}}>{`App Error: ${appError}`}</div> : null;
+
+            return (
+                <>
+                    {renderAppError}
+                    {!currentUser ? (
+                        <AuthComponent setAppError={setAppError} />
+                    ) : (
+                        <Dashboard
+                            currentUser={currentUser}
+                            setAppError={setAppError}
+                            handleSignOut={handleSignOut}
+                        />
+                    )}
+                </>
+            );
         }
 
-        // --- Render the App --- (Identical)
+        // --- Render the App --- (Unchanged)
         const rootElement = document.getElementById('root');
         if (rootElement) { const root = ReactDOM.createRoot(rootElement); root.render(<App />); }
-        else { console.error("#root not found"); document.body.innerHTML = '<div class="error">App failed: Root missing.</div>'; }
+        else { console.error("Fatal Error: #root element not found in HTML."); document.body.innerHTML = '<div class="error" style="margin: 30px;">Application failed to load: Root container missing.</div>'; }
 
     </script>
 
     <!-- Keep Firebase setup instructions as comments if desired, but outside the script tag -->
     <!--
-        Firestore Rules Needed: ... (rules text) ...
-        Firestore Index Needed: ... (index details) ...
+        Firestore Rules Needed:
+        rules_version = '2';
+        service cloud.firestore {
+          match /databases/{database}/documents {
+            // Allow users to read/write only their own notes
+            match /notes/{noteId} {
+              allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+              allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+            }
+          }
+        }
+
+        Firestore Index Needed:
+        Collection ID: notes
+        Fields:
+        1. userId (Ascending)
+        2. entryDate (Descending)
+        3. updatedAt (Descending)
+        Query scope: Collection wjkw
     -->
 
 </body>
